@@ -56,7 +56,7 @@ export function SwipeableCard({
           className="absolute top-8 right-8 z-10 bg-red-500 text-white px-6 py-3 rounded-full font-bold text-xl shadow-lg"
           style={{ opacity: opacityLeft }}
         >
-          ❌ Don't Know
+          ❌ Don&apos;t Know
         </motion.div>
 
         {/* Swipe Right Indicator - Know */}

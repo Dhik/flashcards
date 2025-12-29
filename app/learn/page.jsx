@@ -156,7 +156,7 @@ export default function LearnPage() {
           <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <span className="text-red-500 text-xl">←</span>
-              <span>Swipe left: Don't know</span>
+              <span>Swipe left: Don&apos;t know</span>
             </div>
             <div className="flex items-center gap-2">
               <span>Tap: Flip card</span>

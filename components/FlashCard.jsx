@@ -44,7 +44,7 @@ export function FlashCard({ flashcard, onFlip }) {
             {flashcard.exampleSentenceEn && (
               <div className="max-w-lg">
                 <p className="text-white/90 text-lg leading-relaxed text-center italic">
-                  "{flashcard.exampleSentenceEn}"
+                  &ldquo;{flashcard.exampleSentenceEn}&rdquo;
                 </p>
               </div>
             )}
@@ -84,13 +84,13 @@ export function FlashCard({ flashcard, onFlip }) {
               <div className="space-y-3 mt-6 max-w-lg">
                 <div className="bg-white/10 rounded-lg p-4">
                   <p className="text-white/90 text-base leading-relaxed text-center">
-                    "{flashcard.exampleSentenceEn}"
+                    &ldquo;{flashcard.exampleSentenceEn}&rdquo;
                   </p>
                 </div>
                 {flashcard.exampleSentenceId && (
                   <div className="bg-white/10 rounded-lg p-4">
                     <p className="text-white/90 text-base leading-relaxed text-center">
-                      "{flashcard.exampleSentenceId}"
+                      &ldquo;{flashcard.exampleSentenceId}&rdquo;
                     </p>
                   </div>
                 )}
