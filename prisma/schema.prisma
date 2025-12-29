@@ -1,0 +1,38 @@
+// Prisma Schema for FlashCards App
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Flashcard {
+  id                    String   @id @default(uuid())
+  englishWord           String   @map("english_word")
+  indonesianTranslation String   @map("indonesian_translation")
+  cefrLevel             CEFRLevel @map("cefr_level")
+  partOfSpeech          String?  @map("part_of_speech")
+  exampleSentenceEn     String?  @map("example_sentence_en")
+  exampleSentenceId     String?  @map("example_sentence_id")
+  conversationContext   String?  @map("conversation_context")
+  pronunciationGuide    String?  @map("pronunciation_guide")
+  frequencyRank         Int?     @map("frequency_rank")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@index([cefrLevel])
+  @@index([frequencyRank])
+  @@map("flashcards")
+}
+
+enum CEFRLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+
+  @@map("cefr_level")
+}
