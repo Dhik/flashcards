@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SwipeableCard } from '../../components/SwipeableCard.jsx';
 import { updateCardProgress, getLocalData, getStats } from '../../lib/localStorage.js';
 import { isDue, getPriority } from '../../lib/spacedRepetition.js';
 
-export default function LearnPage() {
+function LearnPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [flashcards, setFlashcards] = useState([]);
@@ -169,5 +169,20 @@ export default function LearnPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LearnPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading flashcards...</p>
+        </div>
+      </div>
+    }>
+      <LearnPageContent />
+    </Suspense>
   );
 }
