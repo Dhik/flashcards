@@ -3,6 +3,9 @@
   "functions": {
     "app/api/generate-ai/route.js": {
       "maxDuration": 30
+    },
+    "app/api/census/import/route.js": {
+      "maxDuration": 60
     }
   }
 }

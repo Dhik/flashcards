@@ -36,3 +36,32 @@ enum CEFRLevel {
 
   @@map("cefr_level")
 }
+
+model Census {
+  id                    String   @id @default(uuid())
+  no                    String?
+  desa                  String?
+  kelompok              String?
+  nama                  String?
+  tempatLahir           String?  @map("tempat_lahir")
+  tglLahir              String?  @map("tgl_lahir")
+  usiaSekarang          Int?     @map("usia_sekarang")
+  jenisKelamin          String?  @map("jenis_kelamin")
+  statusPernikahan      String?  @map("status_pernikahan")
+  pendidikan            String?
+  kelas                 String?
+  namaLembagaPendidikan String?  @map("nama_lembaga_pendidikan")
+  dapukan               String?
+  kategori              String?
+  kategoriUsia          String?  @map("kategori_usia")
+  golonganDarah         String?  @map("golongan_darah")
+  kemubalighan          String?
+  sheet                 String?
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([desa])
+  @@index([sheet])
+  @@index([kategoriUsia])
+  @@map("census")
+}
