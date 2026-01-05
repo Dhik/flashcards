@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { prisma } from '../../../lib/prisma.js';
+import { prisma } from '../../../../lib/prisma.js';
 import path from 'path';
 
 const SPREADSHEET_ID = '1ft5zAdw_MfMxrJv--qyPd526_QCQLdRIC5Gg6C2lOzE';
