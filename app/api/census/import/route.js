@@ -73,6 +73,7 @@ export async function POST(request) {
 
         let sheetImported = 0;
         let sheetErrors = 0;
+        let sheetDuplicates = 0;
         let currentRow = 0;
 
         for (const row of dataRows) {
@@ -84,14 +85,38 @@ export async function POST(request) {
           }
 
           try {
+            const nama = row[3] || null;
+            const tglLahir = normalizeDate(row[5]);
+
+            // Check for duplicate based on name, birth date, and sheet
+            // Skip if all three are null (can't identify uniquely)
+            let isDuplicate = false;
+
+            if (nama || tglLahir) {
+              const existing = await prisma.census.findFirst({
+                where: {
+                  nama: nama,
+                  tglLahir: tglLahir,
+                  sheet: sheetName,
+                },
+              });
+
+              if (existing) {
+                isDuplicate = true;
+                sheetDuplicates++;
+                // Skip this row as it's a duplicate
+                continue;
+              }
+            }
+
             await prisma.census.create({
               data: {
                 no: row[0] || null,
                 desa: row[1] || null,
                 kelompok: row[2] || null,
-                nama: row[3] || null,
+                nama: nama,
                 tempatLahir: row[4] || null,
-                tglLahir: normalizeDate(row[5]),
+                tglLahir: tglLahir,
                 usiaSekarang: parseAge(row[6]),
                 jenisKelamin: row[7] || null,
                 statusPernikahan: row[8] || null,
@@ -127,7 +152,7 @@ export async function POST(request) {
 
         logs.push({
           type: 'success',
-          message: `✓ ${sheetName}: Imported ${sheetImported} records${sheetErrors > 0 ? `, ${sheetErrors} errors` : ''}`,
+          message: `✓ ${sheetName}: Imported ${sheetImported} records${sheetDuplicates > 0 ? `, skipped ${sheetDuplicates} duplicates` : ''}${sheetErrors > 0 ? `, ${sheetErrors} errors` : ''}`,
         });
       } catch (error) {
         logs.push({ type: 'error', message: `Error processing ${sheetName}: ${error.message}` });
