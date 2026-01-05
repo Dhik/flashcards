@@ -38,3 +38,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 /lib/generated/prisma
+google-sheets-credentials.json
