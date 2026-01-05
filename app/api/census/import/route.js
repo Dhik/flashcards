@@ -57,7 +57,7 @@ export async function POST(request) {
 
         const response = await sheets.spreadsheets.values.get({
           spreadsheetId: SPREADSHEET_ID,
-          range: `${sheetName}!A:R`, // Columns A to R (18 columns)
+          range: `${sheetName}!A:Q`, // Columns A to Q (17 columns)
         });
 
         const rows = response.data.values;
