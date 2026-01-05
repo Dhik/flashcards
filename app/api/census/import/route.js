@@ -68,12 +68,16 @@ export async function POST(request) {
 
         // Skip header row
         const dataRows = rows.slice(1);
-        logs.push({ type: 'info', message: `Found ${dataRows.length} rows in ${sheetName}` });
+        const totalRowsInSheet = dataRows.length;
+        logs.push({ type: 'info', message: `Found ${totalRowsInSheet} rows in ${sheetName}` });
 
         let sheetImported = 0;
         let sheetErrors = 0;
+        let currentRow = 0;
 
         for (const row of dataRows) {
+          currentRow++;
+
           // Skip empty rows
           if (!row || row.length === 0 || !row.some(cell => cell && cell.trim())) {
             continue;
@@ -104,9 +108,17 @@ export async function POST(request) {
             });
 
             sheetImported++;
+
+            // Log progress every 50 rows or on last row
+            if (currentRow % 50 === 0 || currentRow === totalRowsInSheet) {
+              logs.push({
+                type: 'info',
+                message: `${sheetName}: Processing row ${currentRow} of ${totalRowsInSheet} (${Math.round((currentRow / totalRowsInSheet) * 100)}%)`,
+              });
+            }
           } catch (error) {
             sheetErrors++;
-            console.error(`Error importing row from ${sheetName}:`, error);
+            console.error(`Error importing row ${currentRow} from ${sheetName}:`, error);
           }
         }
 
