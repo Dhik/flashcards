@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Bash(node scripts/generate-ai-flashcards.js:*)"
+      "Bash(node scripts/generate-ai-flashcards.js:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx prisma generate:*)"
     ]
   }
 }

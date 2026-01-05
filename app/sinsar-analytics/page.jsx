@@ -36,54 +36,87 @@ export default function SinsarAnalyticsPage() {
     setImportLogs([]);
     setShowImportModal(true);
 
-    console.log('Starting import...');
+    console.log('🚀 Starting Google Sheets import...');
+    console.log('📊 Watch this console for detailed server logs');
 
     try {
       const response = await fetch('/api/census/import', {
         method: 'POST',
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log('Import response data:', data);
+      // Read the SSE stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-      if (data.logs) {
-        console.log('Setting logs:', data.logs.length, 'logs');
-        setImportLogs(data.logs);
-      } else {
-        console.warn('No logs in response');
-        setImportLogs([
-          { type: 'warning', message: 'Import completed but no logs were returned' }
-        ]);
-      }
+      while (true) {
+        const { done, value } = await reader.read();
 
-      if (data.success) {
-        console.log('Import successful!');
-        // Reload stats after import
-        setTimeout(() => {
-          loadStats();
-        }, 1000);
-      } else {
-        console.error('Import failed:', data.error);
-        setImportLogs(prev => [
-          ...prev,
-          { type: 'error', message: `Import failed: ${data.error || 'Unknown error'}` },
-        ]);
+        if (done) {
+          break;
+        }
+
+        // Decode the chunk and add to buffer
+        buffer += decoder.decode(value, { stream: true });
+
+        // Process complete SSE messages
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const log = JSON.parse(line.slice(6));
+
+              // Log to console for debugging
+              const logPrefix = log.type === 'error' ? '❌' : log.type === 'success' ? '✅' : log.type === 'warning' ? '⚠️' : 'ℹ️';
+              console.log(`${logPrefix} ${log.message}`);
+
+              // Add log to state in real-time
+              setImportLogs(prev => [...prev, log]);
+
+              // Check if import is done
+              if (log.type === 'done') {
+                setImporting(false);
+
+                if (log.success) {
+                  console.log('✅ Import completed successfully!');
+                  console.log(`📊 Imported: ${log.imported} records, Errors: ${log.errors || 0}`);
+                  // Reload stats after successful import
+                  setTimeout(() => {
+                    loadStats();
+                  }, 1000);
+                } else {
+                  console.error('❌ Import failed:', log.error);
+                  console.log('💡 Check the modal for error details');
+                }
+              }
+            } catch (parseError) {
+              console.error('❌ Error parsing SSE log:', parseError, 'Raw line:', line);
+              // Add parse error to logs so user can see it
+              setImportLogs(prev => [...prev, {
+                type: 'error',
+                message: `Failed to parse server message: ${line.slice(0, 100)}...`
+              }]);
+            }
+          }
+        }
       }
     } catch (error) {
-      console.error('Import error:', error);
+      console.error('❌ Import fetch error:', error);
+      console.error('Error stack:', error.stack);
+
+      // Add error to logs so it's visible in UI
       setImportLogs(prev => [
         ...prev,
-        { type: 'error', message: `Import failed: ${error.message}` },
+        { type: 'error', message: `Connection error: ${error.message}` },
+        { type: 'error', message: 'Import failed. Please check the terminal/console for details.' },
       ]);
-    } finally {
       setImporting(false);
-      console.log('Import process finished');
     }
   };
 
@@ -123,13 +156,33 @@ export default function SinsarAnalyticsPage() {
             <p className="text-gray-600 mt-2">Census data analytics and insights</p>
           </div>
 
-          <button
-            onClick={handleImport}
-            disabled={importing}
-            className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {importing ? 'Importing...' : '📊 Import from Google Sheets'}
-          </button>
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() => router.push('/census-analytics')}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
+            >
+              📈 Analytics Dashboard
+            </button>
+            <button
+              onClick={() => router.push('/desa-analytics')}
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
+            >
+              🏘️ Per-Desa Analytics
+            </button>
+            <button
+              onClick={() => router.push('/census-table')}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
+            >
+              📋 View Table
+            </button>
+            <button
+              onClick={handleImport}
+              disabled={importing}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {importing ? 'Importing...' : '📊 Import from Google Sheets'}
+            </button>
+          </div>
         </div>
       </div>
 

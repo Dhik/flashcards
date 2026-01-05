@@ -21,12 +21,12 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="antialiased min-h-screen">
+      <body className="antialiased min-h-screen" suppressHydrationWarning>
         {children}
       </body>
     </html>
