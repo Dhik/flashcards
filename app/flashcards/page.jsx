@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { LevelSelector } from '../components/LevelSelector.jsx';
-import { getSettings, updatePreferredLevels, getStats } from '../lib/localStorage.js';
+import { LevelSelector } from '../../components/LevelSelector.jsx';
+import { getSettings, updatePreferredLevels, getStats } from '../../lib/localStorage.js';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
