@@ -36,30 +36,54 @@ export default function SinsarAnalyticsPage() {
     setImportLogs([]);
     setShowImportModal(true);
 
+    console.log('Starting import...');
+
     try {
       const response = await fetch('/api/census/import', {
         method: 'POST',
       });
 
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log('Import response data:', data);
 
       if (data.logs) {
+        console.log('Setting logs:', data.logs.length, 'logs');
         setImportLogs(data.logs);
+      } else {
+        console.warn('No logs in response');
+        setImportLogs([
+          { type: 'warning', message: 'Import completed but no logs were returned' }
+        ]);
       }
 
       if (data.success) {
+        console.log('Import successful!');
         // Reload stats after import
         setTimeout(() => {
           loadStats();
         }, 1000);
+      } else {
+        console.error('Import failed:', data.error);
+        setImportLogs(prev => [
+          ...prev,
+          { type: 'error', message: `Import failed: ${data.error || 'Unknown error'}` },
+        ]);
       }
     } catch (error) {
+      console.error('Import error:', error);
       setImportLogs(prev => [
         ...prev,
         { type: 'error', message: `Import failed: ${error.message}` },
       ]);
     } finally {
       setImporting(false);
+      console.log('Import process finished');
     }
   };
 
