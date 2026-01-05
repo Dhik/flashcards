@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../lib/prisma.js';
 import path from 'path';
-
-const prisma = new PrismaClient();
 
 const SPREADSHEET_ID = '1ft5zAdw_MfMxrJv--qyPd526_QCQLdRIC5Gg6C2lOzE';
 const SHEETS = ['RCK', 'CNT', 'CNB', 'CLK', 'SINSAR', 'UBER', 'JATEN'];
