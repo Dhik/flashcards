@@ -48,7 +48,6 @@ export default function SinsarAnalyticsPage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Read the SSE stream
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -60,33 +59,26 @@ export default function SinsarAnalyticsPage() {
           break;
         }
 
-        // Decode the chunk and add to buffer
         buffer += decoder.decode(value, { stream: true });
-
-        // Process complete SSE messages
         const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
               const log = JSON.parse(line.slice(6));
 
-              // Log to console for debugging
               const logPrefix = log.type === 'error' ? '❌' : log.type === 'success' ? '✅' : log.type === 'warning' ? '⚠️' : 'ℹ️';
               console.log(`${logPrefix} ${log.message}`);
 
-              // Add log to state in real-time
               setImportLogs(prev => [...prev, log]);
 
-              // Check if import is done
               if (log.type === 'done') {
                 setImporting(false);
 
                 if (log.success) {
                   console.log('✅ Import completed successfully!');
                   console.log(`📊 Imported: ${log.imported} records, Errors: ${log.errors || 0}`);
-                  // Reload stats after successful import
                   setTimeout(() => {
                     loadStats();
                   }, 1000);
@@ -97,7 +89,6 @@ export default function SinsarAnalyticsPage() {
               }
             } catch (parseError) {
               console.error('❌ Error parsing SSE log:', parseError, 'Raw line:', line);
-              // Add parse error to logs so user can see it
               setImportLogs(prev => [...prev, {
                 type: 'error',
                 message: `Failed to parse server message: ${line.slice(0, 100)}...`
@@ -110,7 +101,6 @@ export default function SinsarAnalyticsPage() {
       console.error('❌ Import fetch error:', error);
       console.error('Error stack:', error.stack);
 
-      // Add error to logs so it's visible in UI
       setImportLogs(prev => [
         ...prev,
         { type: 'error', message: `Connection error: ${error.message}` },
@@ -129,193 +119,156 @@ export default function SinsarAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-teal-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading analytics...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm">Loading analytics...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-50 p-6">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <button
-              onClick={() => router.push('/')}
-              className="text-gray-600 hover:text-gray-800 mb-4 flex items-center gap-2"
-            >
-              ← Back to Home
-            </button>
-            <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-600">
-              SinsarAnalytics Dashboard
-            </h1>
-            <p className="text-gray-600 mt-2">Census data analytics and insights</p>
-          </div>
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <button
+                onClick={() => router.push('/')}
+                className="text-sm text-gray-500 hover:text-gray-700 mb-2 inline-flex items-center gap-1"
+              >
+                ← Back to Home
+              </button>
+              <h1 className="text-2xl font-semibold text-gray-900">Census Analytics</h1>
+              <p className="text-sm text-gray-500 mt-1">Overview and data management</p>
+            </div>
 
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={() => router.push('/census-analytics')}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
-            >
-              📈 Analytics Dashboard
-            </button>
-            <button
-              onClick={() => router.push('/desa-analytics')}
-              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
-            >
-              🏘️ Per-Desa Analytics
-            </button>
-            <button
-              onClick={() => router.push('/census-table')}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
-            >
-              📋 View Table
-            </button>
-            <button
-              onClick={handleImport}
-              disabled={importing}
-              className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {importing ? 'Importing...' : '📊 Import from Google Sheets'}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => router.push('/census-analytics')}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => router.push('/desa-analytics')}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Per-Desa
+              </button>
+              <button
+                onClick={() => router.push('/census-table')}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Data Table
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={importing}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {importing ? 'Importing...' : 'Import Data'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="max-w-7xl mx-auto">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {stats ? (
           <div className="space-y-6">
-            {/* Total Count */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-xl p-8 text-center"
-            >
-              <div className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-teal-600">
-                {stats.total.toLocaleString()}
+            {/* Total Count KPI */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Records</p>
+                <p className="mt-2 text-4xl font-bold text-gray-900">{stats.total.toLocaleString()}</p>
               </div>
-              <div className="text-gray-600 text-xl mt-2">Total Records</div>
-            </motion.div>
+            </div>
 
-            {/* By Sheet */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">By Sheet</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.bySheet.map((item, index) => (
-                  <div key={index} className="bg-green-50 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-green-600">{item.count}</div>
-                    <div className="text-gray-600 text-sm mt-1">{item.sheet}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* By Sheet */}
+              <StatCard title="By Sheet">
+                <div className="grid grid-cols-2 gap-3">
+                  {stats.bySheet.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">{item.sheet}</span>
+                      <span className="text-lg font-semibold text-gray-900">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </StatCard>
 
-            {/* By Gender */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">By Gender</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.byGender.map((item, index) => (
-                  <div key={index} className="bg-teal-50 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-teal-600">{item.count}</div>
-                    <div className="text-gray-600 text-sm mt-1">{item.gender}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              {/* By Gender */}
+              <StatCard title="By Gender">
+                <div className="space-y-2">
+                  {stats.byGender.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">{item.gender}</span>
+                      <span className="text-lg font-semibold text-gray-900">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </StatCard>
 
-            {/* By Age Category */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">By Age Category</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {stats.byAgeCategory.map((item, index) => (
-                  <div key={index} className="bg-blue-50 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-blue-600">{item.count}</div>
-                    <div className="text-gray-600 text-sm mt-1">{item.category}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              {/* By Age Category */}
+              <StatCard title="By Age Category">
+                <div className="grid grid-cols-2 gap-2">
+                  {stats.byAgeCategory.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-xs">
+                      <span className="text-gray-600 truncate">{item.category}</span>
+                      <span className="font-semibold text-gray-900 ml-2">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </StatCard>
 
-            {/* By Marital Status */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">By Marital Status</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.byMaritalStatus.map((item, index) => (
-                  <div key={index} className="bg-purple-50 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-purple-600">{item.count}</div>
-                    <div className="text-gray-600 text-sm mt-1">{item.status}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              {/* By Marital Status */}
+              <StatCard title="By Marital Status">
+                <div className="grid grid-cols-2 gap-3">
+                  {stats.byMaritalStatus.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">{item.status}</span>
+                      <span className="text-lg font-semibold text-gray-900">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </StatCard>
 
-            {/* By Category (Dhuafa/Aghnia) */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">By Category</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {stats.byCategory.map((item, index) => (
-                  <div key={index} className="bg-orange-50 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-orange-600">{item.count}</div>
-                    <div className="text-gray-600 text-sm mt-1">{item.category}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              {/* By Category */}
+              <StatCard title="Economic Category">
+                <div className="space-y-2">
+                  {stats.byCategory.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600">{item.category || 'Unknown'}</span>
+                      <span className="text-lg font-semibold text-gray-900">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </StatCard>
 
-            {/* By Desa */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="bg-white rounded-2xl shadow-xl p-6"
-            >
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">By Desa</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.byDesa.map((item, index) => (
-                  <div key={index} className="bg-pink-50 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-pink-600">{item.count}</div>
-                    <div className="text-gray-600 text-sm mt-1">{item.desa}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+              {/* By Desa */}
+              <StatCard title="By Village (Desa)">
+                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                  {stats.byDesa.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded text-xs">
+                      <span className="text-gray-600 truncate">{item.desa}</span>
+                      <span className="font-semibold text-gray-900 ml-2">{item.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </StatCard>
+            </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-            <div className="text-6xl mb-4">📊</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Available</h2>
-            <p className="text-gray-600 mb-6">
-              Click the import button above to load census data from Google Sheets.
+          <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
+            <div className="text-gray-400 text-5xl mb-4">📊</div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Data Available</h2>
+            <p className="text-gray-500 mb-6">
+              Click the Import Data button to load census data from Google Sheets.
             </p>
           </div>
         )}
@@ -332,21 +285,21 @@ export default function SinsarAnalyticsPage() {
             onClick={closeModal}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 border-b border-gray-200">
+              <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-2xl font-bold text-gray-800">Import Progress</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Import Progress</h3>
                   {!importing && (
                     <button
                       onClick={closeModal}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-gray-400 hover:text-gray-500"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
@@ -357,54 +310,43 @@ export default function SinsarAnalyticsPage() {
               <div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
                 {importing && importLogs.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500 mb-4"></div>
-                    <p className="text-gray-600">Connecting to Google Sheets...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-sm text-gray-600">Connecting to Google Sheets...</p>
                   </div>
                 )}
 
                 <div className="space-y-2">
                   {importLogs.map((log, index) => (
-                    <motion.div
+                    <div
                       key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className={`p-3 rounded-lg flex items-start gap-3 ${
+                      className={`px-3 py-2 rounded text-sm ${
                         log.type === 'success'
-                          ? 'bg-green-50 text-green-800'
+                          ? 'bg-green-50 text-green-800 border border-green-200'
                           : log.type === 'error'
-                          ? 'bg-red-50 text-red-800'
+                          ? 'bg-red-50 text-red-800 border border-red-200'
                           : log.type === 'warning'
-                          ? 'bg-yellow-50 text-yellow-800'
-                          : 'bg-blue-50 text-blue-800'
+                          ? 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+                          : 'bg-blue-50 text-blue-800 border border-blue-200'
                       }`}
                     >
-                      <span className="text-xl flex-shrink-0">
-                        {log.type === 'success'
-                          ? '✓'
-                          : log.type === 'error'
-                          ? '✗'
-                          : log.type === 'warning'
-                          ? '⚠'
-                          : 'ℹ'}
-                      </span>
-                      <p className="flex-1 text-sm">{log.message}</p>
-                    </motion.div>
+                      {log.message}
+                    </div>
                   ))}
                 </div>
 
                 {importing && importLogs.length > 0 && (
-                  <div className="flex items-center justify-center gap-3 mt-6 p-4 bg-blue-50 rounded-lg">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                    <p className="text-blue-800 font-medium">Processing...</p>
+                  <div className="flex items-center justify-center gap-2 mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <p className="text-sm text-blue-800 font-medium">Processing...</p>
                   </div>
                 )}
               </div>
 
               {!importing && importLogs.length > 0 && (
-                <div className="p-6 border-t border-gray-200">
+                <div className="px-6 py-4 border-t border-gray-200">
                   <button
                     onClick={closeModal}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
                     Close
                   </button>
@@ -414,6 +356,15 @@ export default function SinsarAnalyticsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function StatCard({ title, children }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-5">
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">{title}</h3>
+      {children}
     </div>
   );
 }

@@ -95,9 +95,15 @@ Return ONLY the JSON array, no other text.`;
 
     let startRank = (maxRank?.frequencyRank || 0) + 1;
 
-    // Add metadata to each flashcard
+    // Add metadata to each flashcard and map fields to match schema
     const flashcardsWithMeta = flashcards.map((card, index) => ({
-      ...card,
+      englishWord: card.englishWord,
+      indonesianTranslation: card.indonesianTranslation,
+      partOfSpeech: card.partOfSpeech,
+      exampleSentenceEn: card.exampleSentenceEn,
+      exampleSentenceId: card.exampleSentenceId,
+      // Handle both possible field names from AI
+      conversationContext: card.conversationContext || card.conversationSentence || null,
       cefrLevel: level,
       frequencyRank: startRank + index,
     }));
