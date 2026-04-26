@@ -31,6 +31,7 @@ export default function CensusAnalyticsPage() {
   const [timPnkbData, setTimPnkbData] = useState(null);
   const [timPnkbLoading, setTimPnkbLoading] = useState(true);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadData();
     loadTimPnkbData();

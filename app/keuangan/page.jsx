@@ -438,6 +438,7 @@ function TransaksiTab({ transactions, funds, loading, onAdd, onDelete, onEdit, m
     else setCategory('transfer');
   }, [txType]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (funds.length > 0 && !fundId) setFundId(funds[0].id);
   }, [funds]);
@@ -728,7 +729,7 @@ function PortfolioTab({ funds, loading, onAddFund, onDeleteFund }) {
         ) : funds.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-gray-300 gap-2">
             <span className="text-3xl">💳</span>
-            <p className="text-sm">Belum ada dana. Klik "+ Tambah Dana"</p>
+            <p className="text-sm">Belum ada dana. Klik &quot;+ Tambah Dana&quot;</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 pb-2">
@@ -975,12 +976,14 @@ export default function KeuanganPage() {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchFunds();
     fetchOverview(month, year);
     fetchTransactions(month, year);
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchOverview(month, year);
     fetchTransactions(month, year);

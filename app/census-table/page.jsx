@@ -37,6 +37,7 @@ export default function CensusTablePage() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadData();
   }, [pagination.page, filters]);

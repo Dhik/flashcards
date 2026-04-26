@@ -31,6 +31,7 @@ export default function DesaAnalyticsPage() {
     loadOverallData();
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (selectedDesa) {
       loadDesaData();
