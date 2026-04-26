@@ -6,7 +6,8 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
 
     // Get filter parameters
-    const age = searchParams.get('age');
+    const minAge = searchParams.get('minAge');
+    const maxAge = searchParams.get('maxAge');
     const desa = searchParams.get('desa');
     const kelompok = searchParams.get('kelompok');
     const gender = searchParams.get('gender');
@@ -22,8 +23,10 @@ export async function GET(request) {
     // Build where clause
     const where = {};
 
-    if (age) {
-      where.usiaSekarang = parseInt(age);
+    if (minAge || maxAge) {
+      where.usiaSekarang = {};
+      if (minAge) where.usiaSekarang.gte = parseInt(minAge);
+      if (maxAge) where.usiaSekarang.lte = parseInt(maxAge);
     }
 
     if (desa && desa !== 'all') {
@@ -92,6 +95,15 @@ export async function GET(request) {
       where: { statusPernikahan: { not: null } },
     });
 
+    // KPI aggregations (same where clause, respects active filters)
+    const [maleCount, femaleCount, dhuafaCount, aghniCount, avgAgeAgg] = await Promise.all([
+      prisma.census.count({ where: { ...where, jenisKelamin: { contains: 'Laki', mode: 'insensitive' } } }),
+      prisma.census.count({ where: { ...where, jenisKelamin: { contains: 'Perempuan', mode: 'insensitive' } } }),
+      prisma.census.count({ where: { ...where, kategori: { contains: 'Dhuafa', mode: 'insensitive' } } }),
+      prisma.census.count({ where: { ...where, kategori: { contains: 'Aghni', mode: 'insensitive' } } }),
+      prisma.census.aggregate({ where, _avg: { usiaSekarang: true } }),
+    ]);
+
     return NextResponse.json({
       success: true,
       data,
@@ -100,6 +112,14 @@ export async function GET(request) {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
+      },
+      kpi: {
+        total,
+        maleCount,
+        femaleCount,
+        dhuafaCount,
+        aghniCount,
+        avgAge: avgAgeAgg._avg.usiaSekarang ? Math.round(avgAgeAgg._avg.usiaSekarang) : null,
       },
       filterOptions: {
         desa: desaOptions.map(item => item.desa),

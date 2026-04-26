@@ -9,6 +9,7 @@ export default function CensusTablePage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 0 });
+  const [kpi, setKpi] = useState({ total: 0, maleCount: 0, femaleCount: 0, dhuafaCount: 0, aghniCount: 0, avgAge: null });
   const [filterOptions, setFilterOptions] = useState({
     desa: [],
     kelompok: [],
@@ -25,6 +26,8 @@ export default function CensusTablePage() {
     category: 'all',
     maritalStatus: 'all',
     search: '',
+    minAge: '',
+    maxAge: '',
   });
 
   // Modal states
@@ -60,6 +63,7 @@ export default function CensusTablePage() {
       if (result.success) {
         setData(result.data);
         setPagination(result.pagination);
+        setKpi(result.kpi);
         setFilterOptions(result.filterOptions);
       }
     } catch (error) {
@@ -159,7 +163,7 @@ export default function CensusTablePage() {
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Filters</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-8 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
@@ -246,6 +250,30 @@ export default function CensusTablePage() {
                 ))}
               </select>
             </div>
+
+            {/* Age Range */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Min Age</label>
+              <input
+                type="number"
+                placeholder="0"
+                min="0"
+                value={filters.minAge}
+                onChange={(e) => handleFilterChange('minAge', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Max Age</label>
+              <input
+                type="number"
+                placeholder="100"
+                min="0"
+                value={filters.maxAge}
+                onChange={(e) => handleFilterChange('maxAge', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
           </div>
 
           <button
@@ -257,12 +285,60 @@ export default function CensusTablePage() {
                 category: 'all',
                 maritalStatus: 'all',
                 search: '',
+                minAge: '',
+                maxAge: '',
               });
             }}
             className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
           >
             Clear Filters
           </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <KpiCard
+            label="Total Records"
+            value={kpi.total.toLocaleString()}
+            color="from-green-500 to-teal-600"
+            icon="👥"
+          />
+          <KpiCard
+            label="Laki-laki"
+            value={kpi.maleCount.toLocaleString()}
+            sub={kpi.total > 0 ? `${Math.round((kpi.maleCount / kpi.total) * 100)}%` : '0%'}
+            color="from-blue-500 to-blue-600"
+            icon="♂"
+          />
+          <KpiCard
+            label="Perempuan"
+            value={kpi.femaleCount.toLocaleString()}
+            sub={kpi.total > 0 ? `${Math.round((kpi.femaleCount / kpi.total) * 100)}%` : '0%'}
+            color="from-pink-500 to-rose-600"
+            icon="♀"
+          />
+          <KpiCard
+            label="Rata-rata Usia"
+            value={kpi.avgAge !== null ? `${kpi.avgAge} th` : '-'}
+            color="from-purple-500 to-violet-600"
+            icon="📅"
+          />
+          <KpiCard
+            label="Dhuafa"
+            value={kpi.dhuafaCount.toLocaleString()}
+            sub={kpi.total > 0 ? `${Math.round((kpi.dhuafaCount / kpi.total) * 100)}%` : '0%'}
+            color="from-orange-500 to-amber-600"
+            icon="🏠"
+          />
+          <KpiCard
+            label="Aghni"
+            value={kpi.aghniCount.toLocaleString()}
+            sub={kpi.total > 0 ? `${Math.round((kpi.aghniCount / kpi.total) * 100)}%` : '0%'}
+            color="from-emerald-500 to-green-600"
+            icon="💎"
+          />
         </div>
       </div>
 
@@ -576,6 +652,19 @@ export default function CensusTablePage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function KpiCard({ label, value, sub, color, icon }) {
+  return (
+    <div className={`bg-gradient-to-br ${color} rounded-2xl p-5 text-white shadow-lg`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-2xl">{icon}</span>
+        {sub && <span className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded-full">{sub}</span>}
+      </div>
+      <div className="text-2xl font-bold leading-tight">{value}</div>
+      <div className="text-xs font-medium mt-1 text-white/80">{label}</div>
     </div>
   );
 }

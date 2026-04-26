@@ -21,6 +21,13 @@ export default function LandingPage() {
       gradient: 'from-green-500 to-teal-600',
       icon: '📊',
     },
+    {
+      name: 'Keuangan',
+      description: 'Kelola keuangan pribadi, budget, dan portofolio investasi',
+      path: '/keuangan',
+      gradient: 'from-emerald-500 to-green-600',
+      icon: '💰',
+    },
   ];
 
   return (
@@ -38,7 +45,7 @@ export default function LandingPage() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full">
         {apps.map((app, index) => (
           <motion.button
             key={app.name}

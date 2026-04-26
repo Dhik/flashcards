@@ -65,3 +65,69 @@ model Census {
   @@index([kategoriUsia])
   @@map("census")
 }
+
+// ============================================
+// FINANCIAL DASHBOARD MODELS
+// ============================================
+
+model Fund {
+  id               String                 @id @default(uuid())
+  name             String
+  type             FundType
+  color            String                 @default("#10b981")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  fromTransactions FinancialTransaction[] @relation("FromFund")
+  toTransactions   FinancialTransaction[] @relation("ToFund")
+
+  @@index([type])
+  @@map("funds")
+}
+
+model FinancialTransaction {
+  id          String          @id @default(uuid())
+  type        TransactionType
+  amount      Decimal         @db.Decimal(15, 2)
+  category    String
+  description String?
+  date        DateTime        @default(now())
+  fundId      String          @map("fund_id")
+  fund        Fund            @relation("FromFund", fields: [fundId], references: [id])
+  toFundId    String?         @map("to_fund_id")
+  toFund      Fund?           @relation("ToFund", fields: [toFundId], references: [id])
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@index([date])
+  @@index([fundId])
+  @@map("financial_transactions")
+}
+
+model BudgetTarget {
+  id        String   @id @default(uuid())
+  category  String
+  month     Int
+  year      Int
+  amount    Decimal  @db.Decimal(15, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([category, month, year])
+  @@map("budget_targets")
+}
+
+enum FundType {
+  reksa_dana
+  emas
+  e_wallet
+  rekening
+
+  @@map("fund_type")
+}
+
+enum TransactionType {
+  income
+  expense
+  transfer
+
+  @@map("transaction_type")
+}
